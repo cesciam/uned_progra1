@@ -1,6 +1,12 @@
 #include <iostream>
+#include <vector>
 
 using namespace std;
+vector<string> ids_pokemon;
+vector<string> nombres_pokemon;
+vector<int> tipos_pokemon;
+vector<int> poderes_pokemon;
+
 
 int verifica_tipo_pokemon(){
     bool continuar = true;
@@ -10,11 +16,11 @@ int verifica_tipo_pokemon(){
         cout << "2. Agua " << endl;
         cout << "3. Planta " << endl;
         cout << "4. Electrico " << endl;
-        cout << "Ingrese el tipo del pokemon: ";
+        cout << "Ingrese el tipo del pokemon (1-4): ";
         cin >> tipo;
 
         if (tipo>4 || tipo <1 ){
-            cout << "Seleccione una opcion correcta" << endl;
+            cout << "Seleccione una opcion correcta (1-4)." << endl;
         } else{
             continuar = false;
         }
@@ -25,27 +31,42 @@ int verifica_tipo_pokemon(){
 string verifica_id_pokemon(){
     bool continuar = true;
     bool esNumerico = false;
-    string id;
+    string id_ingresado;
     while(continuar){
         cout << "Ingrese el identificador del pokemon: ";
-        cin >> id;
+        cin >> id_ingresado;
         // Se verifica que lo ingresado sea de tipo numerico
         try{
             //string to int
-            stoi(id);
+            stoi(id_ingresado);
             esNumerico = true;
         } catch(const std::invalid_argument&){
             //Este error salta cuando lo ingresado no es de tipo string
             cout << "El ID debe tener solamente digitos numericos." << endl;
             esNumerico = false;
         }
-        if (id.length() != 6){
+        if (id_ingresado.length() != 6){
             cout << "El ID debe tener solamente 6 digitos." << endl;
+            continuar = true;
         } else if(esNumerico){
             continuar = false;
         }
+
+        if(!continuar){
+            //Este ciclo verifica que el ID no haya sido registrado anteriormente
+            for (string i : ids_pokemon){
+                if (i == id_ingresado){
+                    cout << "El ID de registro ya ha sido utilizado. Por favor ingrese otro." << endl;
+                    continuar = true;
+                } else {
+                    continuar = false;
+                }
+            }
+        }
     }
-    return id;
+
+
+    return id_ingresado;
 }
 
 int verifica_poder_pokemon(){
@@ -61,7 +82,7 @@ int verifica_poder_pokemon(){
             continuar = false;
         }
     }
-    return tipo;
+    return poder;
 }
 
 void registrar_pokemon(){
@@ -74,6 +95,12 @@ void registrar_pokemon(){
     id = verifica_id_pokemon();
     tipo = verifica_tipo_pokemon();
     poder = verifica_poder_pokemon();
+
+    ids_pokemon.push_back(id);
+    tipos_pokemon.push_back(tipo);
+    nombres_pokemon.push_back(nombre);
+    poderes_pokemon.push_back(poder);
+
 }
 
 void menu(){
