@@ -8,6 +8,16 @@ vector<int> tipos_pokemon;
 vector<int> poderes_pokemon;
 
 
+string obtener_tipo_pokemon(int tipo) {
+    switch (tipo) {
+        case 1: return "Fuego";
+        case 2: return "Agua";
+        case 3: return "Planta";
+        case 4: return "Eléctrico";
+        default: return "Desconocido";
+    }
+}
+
 int verifica_tipo_pokemon(){
     bool continuar = true;
     int tipo;
@@ -111,7 +121,7 @@ bool existen_pokemones(){
 }
 
 void listar_pokemones(){
-    if(existen_pokemones){
+    if(existen_pokemones()){
         cout << "=============================" << endl;
         cout << "EQUIPO POKEMON" << endl;
         cout << "=============================" << endl;
@@ -119,7 +129,7 @@ void listar_pokemones(){
         for (int i = 0; i < ids_pokemon.size(); i++){
             cout << "- Nombre: " << nombres_pokemon[i] <<endl;
             cout << "ID: " << ids_pokemon[i] <<endl;
-            cout << "Tipo: " << tipos_pokemon[i] <<endl;
+            cout << "Tipo: " << obtener_tipo_pokemon(tipos_pokemon[i]) <<endl;
             cout << "Nivel de poder: " << poderes_pokemon[i] <<endl;
             cout << "-------------------------" << endl;
         }
@@ -173,7 +183,6 @@ int verifica_dificultad(){
     return dificultad;
 }
 
-
 void entrenar_pokemon(){
     string id_ingresado;
     cout << "Ingrese el identificador del pokemon: ";
@@ -195,7 +204,7 @@ void entrenar_pokemon(){
 }
 
 void pokemon_fuerte(){
-    if(existen_pokemones){
+    if(existen_pokemones()){
         int poder_mas_fuerte = -1;
         int posicion_mas_fuerte = -1;
         for (int i = 0; i < poderes_pokemon.size(); i++){
@@ -209,7 +218,7 @@ void pokemon_fuerte(){
         cout << "=============================" << endl;
         cout << "- Nombre: " << nombres_pokemon[posicion_mas_fuerte] <<endl;
         cout << "ID: " << ids_pokemon[posicion_mas_fuerte] <<endl;
-        cout << "Tipo: " << tipos_pokemon[posicion_mas_fuerte] <<endl;
+        cout << "Tipo: " << obtener_tipo_pokemon(tipos_pokemon[posicion_mas_fuerte]) <<endl;
         cout << "Nivel de poder: " << poderes_pokemon[posicion_mas_fuerte] <<endl;
         cout << "-------------------------" << endl;
 
