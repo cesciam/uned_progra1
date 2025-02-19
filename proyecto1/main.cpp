@@ -2,12 +2,46 @@
 #include <vector>
 
 using namespace std;
-vector<string> ids_pokemon;
-vector<string> nombres_pokemon;
-vector<int> tipos_pokemon;
-vector<int> poderes_pokemon;
 
+// =================== DECLARACIÓN DE VARIABLES GLOBALES ===================
 
+// Vectores para almacenar datos de los Pokémon
+vector<string> ids_pokemon; // IDs únicos de cada Pokémon (6 dígitos)
+vector<string> nombres_pokemon; // Nombres de los Pokémon
+vector<int> tipos_pokemon; // Tipos de los Pokémon (Fuego, Agua, Planta)
+vector<int> poderes_pokemon; // Nivel de poder de cada Pokémon (0-100)
+
+// =================== FUNCIONES AUXILIARES ===================
+
+// Verifica si existen Pokémon registrados en el sistema
+bool existen_pokemones(){
+    return (ids_pokemon.size() > 0) ? true : false;
+}
+
+// Obtiene el índice de un Pokémon en los vectores basado en su ID
+// Retorna -1 si el ID no se encuentra
+int buscar_pokemon(string id){
+    for(int i = 0; i < ids_pokemon.size(); i++){
+        if(ids_pokemon[i] == id){
+            return i;
+        }
+    }
+    return -1;
+}
+
+// Verifica si una cadena de texto representa un número entero
+bool es_numerico(string numero){
+    try{
+        // Intenta convertir la cadena a número
+        stoi(numero); 
+        return true;
+    } catch(const std::invalid_argument&){
+        // Retorna falso si ocurre una excepción
+        return false;
+    }
+}
+
+// Verifica si un número está dentro de un rango especificado
 bool verifica_rango(int valor, int valor_min, int valor_max){
     if (valor>valor_max || valor <valor_min ){
         cout << "Seleccione una opcion correcta (" << valor_min<<"-"<<valor_max<<")."<< endl;
@@ -17,6 +51,7 @@ bool verifica_rango(int valor, int valor_min, int valor_max){
     }
 }
 
+// Convierte el código de tipo al nombre completo del tipo
 string obtener_tipo_pokemon(int tipo) {
     switch (tipo) {
         case 1: return "Fuego";
@@ -27,16 +62,8 @@ string obtener_tipo_pokemon(int tipo) {
     }
 }
 
-bool es_numerico(string numero){
-    try{
-        //string to int
-        stoi(numero);
-        return true;
-    } catch(const std::invalid_argument&){
-        //Este error salta cuando el string ingresado no es un int v�lido
-        return false;
-    }
-}
+// =================== FUNCIONES PRINCIPALES ===================
+
 
 int convertir_numero(string numero){
     try{
@@ -137,11 +164,14 @@ int verifica_poder_pokemon(){
     return poder_pokemon_num;
 }
 
+// Registra un nuevo Pokémon en el sistema
 void registrar_pokemon(){
     string nombre;
     string id;
     int tipo;
     int poder;
+
+    // Solicita y valida el ID del Pokémon
     cout << "Ingrese el nombre del pokemon: ";
     cin >> nombre;
     id = verifica_id_pokemon();
@@ -155,9 +185,7 @@ void registrar_pokemon(){
 
 }
 
-bool existen_pokemones(){
-    return (ids_pokemon.size() > 0) ? true : false;
-}
+
 
 void listar_pokemones(){
     if(existen_pokemones()){
@@ -175,15 +203,6 @@ void listar_pokemones(){
     } else {
         cout << "No hay Pokemon registrados aun." << endl;
     }
-}
-
-int buscar_pokemon(string id){
-    for(int i = 0; i < ids_pokemon.size(); i++){
-        if(ids_pokemon[i] == id){
-            return i;
-        }
-    }
-    return -1;
 }
 
 void verifica_tipo_entrenamiento(){
@@ -237,6 +256,7 @@ int verifica_dificultad(){
     return dificultad_entrenamiento;
 }
 
+// Entrena un Pokémon incrementando su poder en 10 puntos (máximo 100)
 void entrenar_pokemon(){
     string id_ingresado;
     cout << "Ingrese el identificador del pokemon: ";
@@ -250,7 +270,7 @@ void entrenar_pokemon(){
             poderes_pokemon[posicion_pokemon] = poderes_pokemon[posicion_pokemon] + 10;
         } else {
             cout << "El entrenamiento ha fallado!" << endl;
-            cout << "Cada derrota es una leccion. La proxima vez seras aun mejor!" << endl;
+            cout << "Cada derrota es una leccion. �La proxima vez seros aun mejor!" << endl;
         }
     } else {
         cout << "No existe un pokemon con el ID ingresado." << endl;
