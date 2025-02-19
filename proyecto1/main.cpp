@@ -13,29 +13,9 @@ string obtener_tipo_pokemon(int tipo) {
         case 1: return "Fuego";
         case 2: return "Agua";
         case 3: return "Planta";
-        case 4: return "Eléctrico";
+        case 4: return "Electrico";
         default: return "Desconocido";
     }
-}
-
-int verifica_tipo_pokemon(){
-    bool continuar = true;
-    int tipo;
-    while(continuar){
-        cout << "1. Fuego " << endl;
-        cout << "2. Agua " << endl;
-        cout << "3. Planta " << endl;
-        cout << "4. Electrico " << endl;
-        cout << "Ingrese el tipo del pokemon (1-4): ";
-        cin >> tipo;
-
-        if (tipo>4 || tipo <1 ){
-            cout << "Seleccione una opcion correcta (1-4)." << endl;
-        } else{
-            continuar = false;
-        }
-    }
-    return tipo;
 }
 
 bool es_numerico(string numero){
@@ -47,6 +27,47 @@ bool es_numerico(string numero){
         //Este error salta cuando el string ingresado no es un int válido
         return false;
     }
+}
+
+int convertir_numero(string numero){
+    try{
+        //string to int
+        return stoi(numero);
+    } catch(const std::invalid_argument&){
+        //Este error salta cuando el string ingresado no es un int válido
+        return -1;
+    }
+}
+
+int verifica_tipo_pokemon(){
+    bool continuar = true;
+    string tipo_pokemon;
+    int tipo_pokemon_num;
+    while(continuar){
+        cout << "1. Fuego " << endl;
+        cout << "2. Agua " << endl;
+        cout << "3. Planta " << endl;
+        cout << "4. Electrico " << endl;
+        cout << "Ingrese el tipo del pokemon (1-4): ";
+        cin >> tipo_pokemon;
+        // primero verifica que el dato ingresado sea numerico
+        if(es_numerico(tipo_pokemon)){
+            // si el dato es numero válido, lo convierte a tipo INT
+            // retorna -1 en caso de no sea un valor numerico valido
+            tipo_pokemon_num = convertir_numero(tipo_pokemon);
+            if(tipo_pokemon_num  > 0 ){
+                if (tipo_pokemon_num>4 || tipo_pokemon_num <1 ){
+                        cout << "Seleccione una opcion correcta (1-4)." << endl;
+                } else{
+                    continuar = false;
+                }
+            }
+        }else {
+            cout << "El tipo debe tener solamente digitos numericos. (1-4)" << endl;
+            continuar = true;
+        }
+    }
+    return tipo_pokemon_num;
 }
 
 string verifica_id_pokemon(){
@@ -84,18 +105,29 @@ string verifica_id_pokemon(){
 
 int verifica_poder_pokemon(){
     bool continuar = true;
-    int poder;
+    string poder;
+    int poder_pokemon_num;
     while(continuar){
         cout << "Ingrese el poder del pokemon(1-100): ";
         cin >> poder;
 
-        if (poder >100 || poder < 1){
-            cout << "Ingrese un numero dentro del rango 1-100." << endl;
-        } else{
-            continuar = false;
+        if(es_numerico(poder)){
+            // si el dato es numero válido, lo convierte a tipo INT
+            // retorna -1 en caso de no sea un valor numerico valido
+            poder_pokemon_num = convertir_numero(poder);
+            if(poder_pokemon_num  > 0 ){
+                if (poder_pokemon_num>100 || poder_pokemon_num <1 ){
+                        cout << "Ingrese un numero dentro del rango 1-100." << endl;
+                } else{
+                    continuar = false;
+                }
+            }
+        }else {
+            cout << "El poder debe tener solamente digitos numericos. (1-4)" << endl;
+            continuar = true;
         }
     }
-    return poder;
+    return poder_pokemon_num;
 }
 
 void registrar_pokemon(){
@@ -139,9 +171,7 @@ void listar_pokemones(){
 }
 
 int buscar_pokemon(string id){
-
     for(int i = 0; i < ids_pokemon.size(); i++){
-        cout << ids_pokemon[i] << endl;
         if(ids_pokemon[i] == id){
             return i;
         }
@@ -149,20 +179,38 @@ int buscar_pokemon(string id){
     return -1;
 }
 
+bool verifica_rango(int valor, int valor_min, int valor_max){
+    if (valor>valor_max || valor <valor_min ){
+        cout << "Seleccione una opcion correcta (" << valor_min<<"-"<<valor_max<<")."<< endl;
+        return false;
+    } else{
+        return true;
+    }
+}
+
 void verifica_tipo_entrenamiento(){
     bool continuar = true;
-    int tipo;
+    string tipo;
+    int tipo_pokemon_num ;
     while(continuar){
-        cout << "1. Combateen gimnasio." << endl;
+        cout << "1. Combate en gimnasio." << endl;
         cout << "2. Batalla con otro entrenador." << endl;
         cout << "3. Practica de habilidades." << endl;
         cout << "Ingrese el tipo de entrenamiento (1-3): ";
         cin >> tipo;
 
-        if (tipo>3 || tipo <1 ){
-            cout << "Seleccione una opcion correcta (1-3)." << endl;
-        } else{
-            continuar = false;
+        if(es_numerico(tipo)){
+            // si el dato es numero válido, lo convierte a tipo INT
+            // retorna -1 en caso de no sea un valor numerico valido
+            tipo_pokemon_num = convertir_numero(tipo);
+            if(tipo_pokemon_num > 0 ){
+                if (verifica_rango(tipo_pokemon_num, 1, 3)){
+                    continuar = false;
+                }
+            }
+        }else {
+            cout << "El tipo de entrenamiento debe tener solamente digitos numericos. (1-3)" << endl;
+            continuar = true;
         }
     }
 }
@@ -284,8 +332,7 @@ void llenar_pokemones() {
     }
 }
 
-int main()
-{
+int main(){
     llenar_pokemones();
     menu();
     return 0;
