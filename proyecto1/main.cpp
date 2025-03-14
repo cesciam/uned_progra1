@@ -33,7 +33,7 @@ int buscar_pokemon(string id){
 bool es_numerico(string numero){
     try{
         // Intenta convertir la cadena a número
-        stoi(numero); 
+        stoi(numero);
         return true;
     } catch(const std::invalid_argument&){
         // Retorna falso si ocurre una excepción
@@ -352,6 +352,7 @@ void menu(){
     }
 }
 
+// Esta funcion llena los vectores con datos para realizar las pruebas
 void llenar_pokemones() {
     vector<string> ids = {"000001", "000002", "000003", "000004", "000005"};
     vector<string> nombres = {"Pikachu", "Charmander", "Bulbasaur", "Squirtle", "Eevee"};
@@ -367,7 +368,8 @@ void llenar_pokemones() {
 }
 
 int main(){
-    llenar_pokemones();
+    // Descomentar la linea de abajo para cargar el programa con datos registrados
+    // llenar_pokemones();
     menu();
     return 0;
 }
