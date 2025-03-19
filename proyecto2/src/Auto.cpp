@@ -25,9 +25,9 @@ void Auto::setIdRegistrador(const std::string& id) { idRegistrador = id; }
 
 // Implementación del método para mostrar la información del auto
 void Auto::mostrarInformacion() const {
-    std::cout << "Código de Auto: " << codigoAuto << std::endl;
+    std::cout << "Codigo de Auto: " << codigoAuto << std::endl;
     std::cout << "Nombre del Auto: " << nombreAuto << std::endl;
-    std::cout << "Velocidad Máxima: " << velocidadMaxima << " km/h" << std::endl;
+    std::cout << "Velocidad Maxima: " << velocidadMaxima << " km/h" << std::endl;
     std::cout << "Caballos de Fuerza: " << caballosFuerza << " HP" << std::endl;
     std::cout << "Equipo/Propietario: " << equipoPropietario << std::endl;
     std::cout << "Costo del Auto: $" << costoAuto << std::endl;
