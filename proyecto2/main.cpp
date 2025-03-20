@@ -1,4 +1,5 @@
 #include "Auto.h"
+#include "Competencia.h"
 #include <iostream> // liberia leer y escribir
 #include <fstream>
 #include <string>
@@ -11,19 +12,10 @@
 #include <vector>
 using namespace std;
 
-// Función para leer una cadena evitando problemas con el buffer
-string leer_string(string mensaje) {
-    string entrada;
-    while (true) {
-        cout << mensaje;
-        getline(cin, entrada);
-        if (!entrada.empty()) {
-            // Si la cadena no está vacía, salimos del bucle
-            break;
-        }
-    }
-    return entrada;
-}
+// Inicio Definicion de funciones
+void menu();  // DeclaraciÃ³n de la funciÃ³n antes de main()
+// Fin Definicion de funciones
+
 
 Auto parsear_linea_a_auto(const string& linea) {
     string codigo, nombre, equipo, id_registro;
@@ -58,19 +50,63 @@ Auto parsear_linea_a_auto(const string& linea) {
     return Auto(codigo, nombre, velocidad, caballos_fuerza, equipo, costo, id_registro);
 }
 
+
+Auto buscar_auto(const string& codigo_busqueda) {
+    ifstream archivo("AUTOS.TXT");
+    if (!archivo) {
+        cout << "Error: No se pudo abrir el archivo." << endl;
+        return Auto("", "", 0, 0, "", 0,"000000000"); // Retorna un Auto vacÃ­o
+    }
+
+    string linea;
+    while (getline(archivo, linea)) {
+        size_t pos = linea.find(',');
+        if (pos != string::npos && linea.substr(0, pos) == codigo_busqueda) {
+            archivo.close();
+            return parsear_linea_a_auto(linea); // Retorna el auto encontrado
+        }
+    }
+
+    archivo.close();
+    return Auto("", "", 0, 0, "", 0,"000000000"); // Retorna un Auto vacÃ­o
+}
+
+// Imprime mensajes con ======
+void mostrar_banner(string mensaje){
+    cout << "================================================"<< endl;
+    cout << mensaje << endl;
+    cout << "================================================"<< endl;
+    cout << ""<< endl;
+
+}
+
+// Funcion para leer una cadena evitando problemas con el buffer
+string leer_string(string mensaje) {
+    string entrada;
+    while (true) {
+        cout << mensaje;
+        getline(cin, entrada);
+        if (!entrada.empty()) {
+            // Si la cadena no estï¿½ vacï¿½a, salimos del bucle
+            break;
+        }
+    }
+    return entrada;
+}
+
 bool validacion_continuar(const string& mensaje) {
     string continua;
     while (true) {
-        cout << "================================================"<< endl;
-        cout << mensaje; // Muestra el mensaje al usuario
+        mostrar_banner("");
+        cout << mensaje;
         getline(cin, continua); // Lee la entrada completa
 
-        // Convierte la entrada a minúsculas para simplificar la validación
+        // Convierte la entrada a minï¿½sculas para simplificar la validaciï¿½n
         for (char& c : continua) {
             c = tolower(c);
         }
 
-        // Validación de la entrada
+        // Validaciï¿½n de la entrada
         if (continua == "s") {
             return true;
         } else if (continua == "n") {
@@ -84,31 +120,26 @@ bool validacion_continuar(const string& mensaje) {
 
 void consultar_autos() {
     ifstream archivo("AUTOS.TXT");
-    if (!archivo) { // Verificar si el archivo se abrió correctamente
+    if (!archivo) { // Verificar si el archivo se abriï¿½ correctamente
         cout << "Error: No se pudo abrir el archivo." << endl;
         return;
     }
-
     string codigo_busqueda;
-    cout << "================================================"<< endl;
-    cout << "CONSULTAR AUTO EN INVENTARIO"<< endl;
-    cout << "================================================"<< endl;
+    mostrar_banner("CONSULTAR AUTO EN INVENTARIO");
     codigo_busqueda = leer_string("Ingrese el codigo del auto a buscar: ");
-
     cout << "Buscando auto con codigo: " << codigo_busqueda << "..."<<endl;
 
     string linea;
     bool encontrado = false;
 
-    while (getline(archivo, linea)) { // Leer cada línea del archivo
+    while (getline(archivo, linea)) { // Leer cada lï¿½nea del archivo
         size_t pos = linea.find(',');
         if (pos != string::npos && linea.substr(0, pos) == codigo_busqueda) {
-            // Parsear la línea y crear un objeto Auto
+            // Parsear la lï¿½nea y crear un objeto Auto
             Auto auto_encontrado = parsear_linea_a_auto(linea);
-            // Mostrar la información del auto
-            cout << "================================================"<< endl;
+            // Mostrar la informaciï¿½n del auto
+            mostrar_banner ("Datos del auto encontrado");
             cout << "Datos del auto encontrado:"<< endl;
-            cout << "================================================"<< endl;
             auto_encontrado.mostrarInformacion();
             encontrado = true;
             break;
@@ -119,13 +150,13 @@ void consultar_autos() {
         cout << "No se encontro un auto con el codigo " << codigo_busqueda << "." << endl;
     }
 
-    archivo.close(); // Cerrar el archivo después de usarlo
+    archivo.close(); // Cerrar el archivo despues de usarlo
 
-    // Limpiar el búfer de entrada antes de llamar a validacion_continuar
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    // Limpiar el bufer de entrada antes de llamar a validacion_continuar
+    // cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
     if (validacion_continuar("Desea volver al menu principal? (S/N): ")) {
-        return; // Volver al menú principal
+        menu();
     } else {
         consultar_autos(); // Volver a consultar otro auto
     }
@@ -152,63 +183,63 @@ void guardar_auto(const Auto& nuevo_auto) {
     }
 }
 
-// Función para generar un código aleatorio en formato A00000000
-string generar_codigo_auto() {
-    string codigo = "A"; // El código siempre empieza con "A"
+// Funcion para generar un codigo aleatorio en formato A/C00000000
+string generar_codigo(string prefijo) {
+    string codigo = prefijo; // El codigo siempre empieza con "A"
     for (int i = 0; i < 8; i++) {
-        codigo += to_string(rand() % 10); // Agrega un dígito aleatorio (0-9)
+        codigo += to_string(rand() % 10); // Agrega un dï¿½gito aleatorio (0-9)
     }
     return codigo;
 }
 
-// Función para verificar si un código ya existe en el archivo AUTOS.TXT
-bool codigo_existe(const string& codigo) {
-    ifstream archivo("AUTOS.TXT");
+// Funciï¿½n para verificar si un cï¿½digo ya existe en el archivo AUTOS.TXT
+bool codigo_existe(const string& codigo, string nombre_archivo) {
+    ifstream archivo(nombre_archivo);
     string linea;
     while (getline(archivo, linea)) {
-        size_t pos = linea.find(','); // Busca la primera coma (el código está antes de la primera coma)
+        size_t pos = linea.find(','); // Busca la primera coma (el cï¿½digo estï¿½ antes de la primera coma)
         if (pos != string::npos && linea.substr(0, pos) == codigo) {
-            return true; // El código ya existe
+            return true; // El cï¿½digo ya existe
         }
     }
-    return false; // El código no existe
+    return false; // El cï¿½digo no existe
 }
 
-// Función para generar un código único
-string generar_codigo_unico() {
+// Funciï¿½n para generar un codigo unico
+string generar_codigo_unico(string prefijo, string nombre_archivo) {
     string codigo;
     do {
-        codigo = generar_codigo_auto(); // Genera un código aleatorio
-    } while (codigo_existe(codigo));   // Verifica que no exista en el archivo
+        codigo = generar_codigo(prefijo); // Genera un codigo aleatorio
+    } while (codigo_existe(codigo, nombre_archivo));   // Verifica que no exista en el archivo
     return codigo;
 }
 
-// Función que verifica si una cadena representa un número entero válido
+// Funciï¿½n que verifica si una cadena representa un nï¿½mero entero vï¿½lido
 bool es_numerico(const string& numero) {
-    if (numero.empty()) return false; // Cadena vacía no es numérica
+    if (numero.empty()) return false; // Cadena vacï¿½a no es numï¿½rica
 
     size_t inicio = 0;
 
     // Permitir un signo '+' o '-' al inicio
     if (numero[0] == '+' || numero[0] == '-') {
-        if (numero.size() == 1) return false; // Solo un signo no es válido
-        inicio = 1; // Saltamos el primer carácter
+        if (numero.size() == 1) return false; // Solo un signo no es vï¿½lido
+        inicio = 1; // Saltamos el primer carï¿½cter
     }
 
-    // Verificar que el resto de caracteres sean dígitos
+    // Verificar que el resto de caracteres sean dï¿½gitos
     for (size_t i = inicio; i < numero.size(); i++) {
         if (!isdigit(numero[i])) return false;
     }
     return true;
 }
 
-// Función que convierte una cadena a número entero
+// Funciï¿½n que convierte una cadena a nï¿½mero entero
 int convertir_numero(const string& numero) {
-    if (!es_numerico(numero)) return -1; // Si no es numérico, retorna -1
+    if (!es_numerico(numero)) return -1; // Si no es numï¿½rico, retorna -1
     try {
-        return stoi(numero); // Convierte el número
+        return stoi(numero); // Convierte el nï¿½mero
     } catch (const out_of_range&) {
-        return -1; // Si el número es demasiado grande o pequeño para int, retorna -1
+        return -1; // Si el nï¿½mero es demasiado grande o pequeï¿½o para int, retorna -1
     }
 }
 
@@ -219,14 +250,13 @@ int leer_int(const string& mensaje) {
     while (true) {
         cout << mensaje;
         cin >> valor;
-
         if (es_numerico(valor)) {
             convertido = convertir_numero(valor);
-            cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Limpiar solo si la entrada es válida
+            cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Limpiar solo si la entrada es vï¿½lida
             return convertido;
         }
 
-        cout << "Error: Entrada no válida. Debe ingresar un número entero. Intente de nuevo.\n";
+        cout << "Error: Entrada no valida. Debe ingresar un numero entero. Intente de nuevo.\n";
         cin.clear(); // Limpia estado de error
         cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Limpia cualquier residuo
     }
@@ -235,13 +265,13 @@ int leer_int(const string& mensaje) {
 bool validar_id_registro(const string& id) {
     if (id.length() != 9) return false; // Verifica la longitud
     for (char c : id) {
-        if (!isdigit(c)) return false; // Verifica que todos los caracteres sean dígitos
+        if (!isdigit(c)) return false; // Verifica que todos los caracteres sean dï¿½gitos
     }
     return true;
 }
 
 void ingresar_auto(){
-    string codigo = generar_codigo_unico();
+    string codigo = generar_codigo_unico("A", "AUTOS.TXT");
     string nombre;
     int velocidad;
     int caballos_fuerza;
@@ -249,9 +279,7 @@ void ingresar_auto(){
     int costo;
     string id_registro;
     system("cls");
-    cout << "================================================"<< endl;
-    cout << "INGRESAR AUTO A INVENTARIO"<< endl;
-    cout << "================================================"<< endl;
+    mostrar_banner("INGRESAR AUTO A INVENTARIO");
     cout << "Codigo de auto: " << codigo << "<-- (Generado automaticamente)"<< endl;
     nombre = leer_string("Nombre del Auto (modelo/marca): ");
     velocidad = leer_int("Velocidad Maxima (km/h): ");
@@ -269,7 +297,7 @@ void ingresar_auto(){
     system("cls");
     nuevo_auto.mostrarInformacion();
 
-    if (validacion_continuar ("¿Esta seguro de que desea registrar este auto? (S/N): ")){
+    if (validacion_continuar ("Esta seguro de que desea registrar este auto? (S/N): ")){
         guardar_auto(nuevo_auto);
     } else {
         return;
@@ -277,50 +305,40 @@ void ingresar_auto(){
 }
 
 
-void modificar_auto(){
-    ifstream archivo("AUTOS.TXT");
-    if (!archivo) {
-        cout << "Error: No se pudo abrir el archivo." << endl;
+void modificar_auto() {
+    mostrar_banner("MODIFICAR AUTO EN INVENTARIO");
+
+    string codigo_busqueda = leer_string("Ingrese el codigo del auto a modificar: ");
+    Auto auto_encontrado = buscar_auto(codigo_busqueda);
+
+    if (auto_encontrado.getCodigoAuto().empty()) {
+        cout << "No se encontrÃ³ un auto con el cÃ³digo " << codigo_busqueda << "." << endl;
+        if (validacion_continuar("Desea intentar de nuevo? (S/N): ")) {
+            modificar_auto(); // Volver a intentar
+        }
         return;
     }
 
-    cout << "================================================"<< endl;
-    cout << "Modificar auto en inventario"<< endl;
-    cout << "================================================"<< endl;
+    mostrar_banner("Datos del Auto Encontrado");
+    auto_encontrado.mostrarInformacion();
 
-    string codigo_busqueda;
-    codigo_busqueda = leer_string("Ingrese el codigo del auto a modificar: ");
+    if (validacion_continuar("Desea modificar la velocidad maxima y los caballos de fuerza? (S/N): ")) {
+        int nueva_velocidad = leer_int("Nueva velocidad maxima (km/h): ");
+        int nuevos_caballos_fuerza = leer_int("Nuevos caballos de fuerza (HP): ");
 
-    cout << ""<< endl;
-    cout << "Buscando auto con codigo: "<<codigo_busqueda << "..."<<endl;
+        // Actualizar el auto
+        auto_encontrado.setVelocidadMaxima(nueva_velocidad);
+        auto_encontrado.setCaballosFuerza(nuevos_caballos_fuerza);
 
-    string linea;
-    vector<string> lineas_archivo; // Almacenar todas las líneas del archivo
-    bool encontrado = false;
+        // Actualizar el archivo
+        ifstream archivo_lectura("AUTOS.TXT");
+        vector<string> lineas_archivo;
+        string linea;
 
-    while (getline(archivo, linea)) {
-        size_t pos = linea.find(',');
-        if (pos != string::npos && linea.substr(0, pos) == codigo_busqueda) {
-            // Parsear la línea y crear un objeto Auto
-            Auto auto_encontrado = parsear_linea_a_auto(linea);
-
-            cout << "================================================"<< endl;
-            cout << "Datos del Auto Encontrado"<< endl;
-            cout << "================================================"<< endl;
-            auto_encontrado.mostrarInformacion();
-
-            // Solicitar nuevos valores
-            cout << "================================================"<< endl;
-            if(validacion_continuar("Desea modificar la velocidad maxima y los caballos de fuerza? (S/N): ")){
-                int nueva_velocidad = leer_int("Nueva velocidad maxima (km/h): ");
-                int nuevos_caballos_fuerza = leer_int("Nuevos caballos de fuerza (HP): ");
-                cout << "================================================"<< endl;
-
-                // Actualizar el auto
-                auto_encontrado.setVelocidadMaxima(nueva_velocidad);
-                auto_encontrado.setCaballosFuerza(nuevos_caballos_fuerza);
-
-                // Reconstruir la línea con los nuevos valores
+        while (getline(archivo_lectura, linea)) {
+            size_t pos = linea.find(',');
+            if (pos != string::npos && linea.substr(0, pos) == codigo_busqueda) {
+                // Reemplazar la lÃ­nea con los nuevos valores
                 string nueva_linea = auto_encontrado.getCodigoAuto() + "," +
                                      auto_encontrado.getNombreAuto() + "," +
                                      to_string(auto_encontrado.getVelocidadMaxima()) + "," +
@@ -328,93 +346,77 @@ void modificar_auto(){
                                      auto_encontrado.getEquipoPropietario() + "," +
                                      to_string(auto_encontrado.getCostoAuto()) + "," +
                                      auto_encontrado.getIdRegistrador();
-
-                lineas_archivo.push_back(nueva_linea); // Guardar la línea modificada
-                encontrado = true;
-                cout << "================================================"<< endl;
-                cout << "Los datos han sido actualizados exitosamente."<< endl;
-                cout << "================================================"<< endl;
-                cout << "Los cambios se han guardado en el archivo AUTOS.TXT"<< endl;
-                auto_encontrado.mostrarInformacion();
-            }{
-                lineas_archivo.push_back(linea); // Guardar la línea sin modificar
-                return;
+                lineas_archivo.push_back(nueva_linea);
+            } else {
+                lineas_archivo.push_back(linea); // Mantener las otras lÃ­neas sin cambios
             }
-
-        } else {
-            lineas_archivo.push_back(linea); // Guardar la línea sin modificar
         }
-    }
+        archivo_lectura.close();
 
-    archivo.close();
-
-    if (!encontrado) {
-        cout << "No se encontro un auto con el codigo " << codigo_busqueda << "." << endl;
-    } else {
-        // Guardar todas las líneas en el archivo
-        ofstream archivo_salida("AUTOS.TXT");
+        // Escribir todas las lÃ­neas en el archivo
+        ofstream archivo_escritura("AUTOS.TXT");
         for (const string& l : lineas_archivo) {
-            archivo_salida << l << endl;
+            archivo_escritura << l << endl;
         }
-        archivo_salida.close();
-        cout << "Auto modificado exitosamente." << endl;
+        archivo_escritura.close();
+
+        mostrar_banner("Los datos han sido actualizados exitosamente.");
+        auto_encontrado.mostrarInformacion();
     }
 
     if (validacion_continuar("Desea volver al menu principal? (S/N): ")) {
-        return; // Volver al menú principal
-    } else {
-        modificar_auto(); // Volver a modificar otro auto
+        menu(); // Volver a modificar otro auto
+    }else{
+        modificar_auto();
     }
 }
 
-void eliminar_auto(){
-        ifstream archivo("AUTOS.TXT");
-    if (!archivo) {
-        cout << "Error: No se pudo abrir el archivo." << endl;
+void eliminar_auto() {
+    mostrar_banner("ELIMINAR AUTO DEL INVENTARIO");
+
+    string codigo_busqueda = leer_string("Ingrese el codigo del auto a eliminar: ");
+    Auto auto_encontrado = buscar_auto(codigo_busqueda);
+
+    if (auto_encontrado.getCodigoAuto().empty()) {
+        cout << "No se encontro un auto con el cÃ³digo " << codigo_busqueda << "." << endl;
+        if (validacion_continuar("Desea intentar de nuevo? (S/N): ")) {
+            eliminar_auto(); // Volver a intentar
+        }
         return;
     }
 
-    string codigo_busqueda;
-    cout << "Ingrese el codigo del auto a eliminar: ";
-    cin >> codigo_busqueda;
+    mostrar_banner("Datos del Auto Encontrado");
+    auto_encontrado.mostrarInformacion();
 
-    string linea;
-    vector<string> lineas_archivo; // Almacenar todas las líneas del archivo
-    bool encontrado = false;
+    if (validacion_continuar("Esta seguro de que desea eliminar este auto? (S/N): ")) {
+        ifstream archivo_lectura("AUTOS.TXT");
+        vector<string> lineas_archivo;
+        string linea;
 
-    while (getline(archivo, linea)) {
-        size_t pos = linea.find(',');
-        if (pos != string::npos && linea.substr(0, pos) == codigo_busqueda) {
-            cout << "\nAuto encontrado y eliminado:\n";
-            Auto auto_encontrado = parsear_linea_a_auto(linea); // Función para convertir línea a objeto Auto
-            auto_encontrado.mostrarInformacion();
-            encontrado = true;
-        } else {
-            lineas_archivo.push_back(linea); // Guardar la línea si no es el auto a eliminar
+        while (getline(archivo_lectura, linea)) {
+            size_t pos = linea.find(',');
+            if (pos == string::npos || linea.substr(0, pos) != codigo_busqueda) {
+                lineas_archivo.push_back(linea); // Guardar todas las lÃ­neas excepto la del auto a eliminar
+            }
         }
-    }
+        archivo_lectura.close();
 
-    archivo.close();
-
-    if (!encontrado) {
-        cout << "No se encontro un auto con el codigo " << codigo_busqueda << "." << endl;
-    } else {
-        // Guardar todas las líneas en el archivo (excepto la eliminada)
-        ofstream archivo_salida("AUTOS.TXT");
+        // Escribir todas las lÃ­neas en el archivo
+        ofstream archivo_escritura("AUTOS.TXT");
         for (const string& l : lineas_archivo) {
-            archivo_salida << l << endl;
+            archivo_escritura << l << endl;
         }
-        archivo_salida.close();
-        cout << "Auto eliminado exitosamente." << endl;
-    }
+        archivo_escritura.close();
 
-    // Limpiar el búfer de entrada antes de llamar a validacion_continuar
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout << "Auto eliminado exitosamente." << endl;
+    } else {
+        cout << "EliminaciÃ³n cancelada." << endl;
+    }
 
     if (validacion_continuar("Desea volver al menu principal? (S/N): ")) {
-        return; // Volver al menú principal
+        menu();
     } else {
-        eliminar_auto(); // Volver a eliminar otro auto
+        eliminar_auto();
     }
 }
 
@@ -438,22 +440,18 @@ void menu_autos(){
             switch (opcion_ingresada_num){
                 case 1:{
                     ingresar_auto();
-                    cout << "// menu_autos();" << endl;
                     break;
                 }
                 case 2:{
                     consultar_autos();
-                    cout << "// menu_competencias();"<< endl;
                     break;
                 }
                 case 3:{
                     modificar_auto();
-                    cout << "// inventario();"<< endl;
                     break;
                 }
                 case 4:{
                     eliminar_auto();
-                    cout << "// reporte_competencias();"<< endl;
                     break;
                 }
                 case 5:{
@@ -470,11 +468,65 @@ void menu_autos(){
     }
 }
 
+void incribir_competencia(){
+
+    string codigo = generar_codigo_unico("C", "COMPETENCIAS.txt");
+
+    if(buscar_auto(leer_string("Ingrese el codigo de auto 1: ")).getCodigoAuto() != ""){
+        cout << "EXISTE" << endl;
+    }else{
+        cout << "no EXISTE" << endl;
+    }
+
+    cin >> codigo;
+
+}
+
+void consultar_competencia(){
+
+}
+
+void menu_competencias(){
+    bool continuar = true;
+    int opcion_ingresada_num = 0;
+    string opcion_ingresada = "";
+    while(continuar){
+        system("cls");
+        cout << "=============================" << endl;
+        cout << "1. Inscribir auto en competencia" << endl;
+        cout << "2. Consultar competencia" << endl;
+        cout << "3. Salir del programa" << endl;
+        cout << "=============================" << endl;
+        opcion_ingresada = leer_string("Ingrese una opcion: ");
+
+        if(es_numerico(opcion_ingresada)){
+            opcion_ingresada_num = convertir_numero(opcion_ingresada);
+            switch (opcion_ingresada_num){
+                case 1:{
+                    incribir_competencia();
+                    break;
+                }
+                case 2:{
+                    consultar_competencia();
+                    break;
+                }
+                default:{
+                    cout << "Ingrese una opcion correcta. (1-2)" << endl;
+                }
+            }
+        }
+        else{
+            cout << "Ingrese una opcion correcta. (1-2)" << endl;
+        }
+    }
+}
+
 void menu(){
     bool continuar = true;
     int opcion_ingresada_num = 0;
     string opcion_ingresada = "";
     while(continuar){
+        system("cls");
         cout << "=============================" << endl;
         cout << "1. Inventario de Autos" << endl;
         cout << "2. Registro de Competencias" << endl;
@@ -492,8 +544,7 @@ void menu(){
                     break;
                 }
                 case 2:{
-                    // menu_compentencias();
-                    cout << "// menu_competencias();"<< endl;
+                    menu_competencias();
                     break;
                 }
                 case 3:{
@@ -523,12 +574,9 @@ void menu(){
 }
 
 int main() {
-    // Crear un objeto Auto
-    // Auto miAuto("A12345678", "Ferrari 488 GTB", 330.5, 660, "Scuderia Ferrari", 250000.0, "ID12345");
 
-    // Mostrar la información del auto
-    // miAuto.mostrarInformacion();
+
+
     menu();
-
     return 0;
 }
