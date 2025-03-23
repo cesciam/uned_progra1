@@ -10,12 +10,21 @@
 #include <cstdlib> // Para rand() y srand()
 #include <ctime>   // Para time()
 #include <vector>
+#include <regex>
 using namespace std;
 
 // Inicio Definicion de funciones
-void menu();  // Declaración de la función antes de main()
+void menu();  // Declaracion de la funcion antes de main()
 // Fin Definicion de funciones
 
+bool verifica_rango(int valor, int valor_min, int valor_max){
+    if (valor>valor_max || valor <valor_min ){
+        cout << "Seleccione una opcion correcta (" << valor_min<<"-"<<valor_max<<")."<< endl;
+        return false;
+    } else{
+        return true;
+    }
+}
 
 Auto parsear_linea_a_auto(const string& linea) {
     string codigo, nombre, equipo, id_registro;
@@ -87,7 +96,7 @@ string leer_string(string mensaje) {
         cout << mensaje;
         getline(cin, entrada);
         if (!entrada.empty()) {
-            // Si la cadena no est� vac�a, salimos del bucle
+            // Si la cadena no esta vacia, salimos del bucle
             break;
         }
     }
@@ -116,7 +125,6 @@ bool validacion_continuar(const string& mensaje) {
         }
     }
 }
-
 
 void consultar_autos() {
     ifstream archivo("AUTOS.TXT");
@@ -151,9 +159,6 @@ void consultar_autos() {
     }
 
     archivo.close(); // Cerrar el archivo despues de usarlo
-
-    // Limpiar el bufer de entrada antes de llamar a validacion_continuar
-    // cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
     if (validacion_continuar("Desea volver al menu principal? (S/N): ")) {
         menu();
@@ -192,7 +197,7 @@ string generar_codigo(string prefijo) {
     return codigo;
 }
 
-// Funci�n para verificar si un c�digo ya existe en el archivo AUTOS.TXT
+// Funcion para verificar si un codigo ya existe en el archivo AUTOS.TXT
 bool codigo_existe(const string& codigo, string nombre_archivo) {
     ifstream archivo(nombre_archivo);
     string linea;
@@ -205,7 +210,7 @@ bool codigo_existe(const string& codigo, string nombre_archivo) {
     return false; // El c�digo no existe
 }
 
-// Funci�n para generar un codigo unico
+// Funcion para generar un codigo unico
 string generar_codigo_unico(string prefijo, string nombre_archivo) {
     string codigo;
     do {
@@ -214,7 +219,7 @@ string generar_codigo_unico(string prefijo, string nombre_archivo) {
     return codigo;
 }
 
-// Funci�n que verifica si una cadena representa un n�mero entero v�lido
+// Funcion que verifica si una cadena representa un n�mero entero v�lido
 bool es_numerico(const string& numero) {
     if (numero.empty()) return false; // Cadena vac�a no es num�rica
 
@@ -250,15 +255,17 @@ int leer_int(const string& mensaje) {
     while (true) {
         cout << mensaje;
         cin >> valor;
+
+        // Limpiar el buffer después de usar cin
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
         if (es_numerico(valor)) {
             convertido = convertir_numero(valor);
-            cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Limpiar solo si la entrada es v�lida
             return convertido;
         }
 
         cout << "Error: Entrada no valida. Debe ingresar un numero entero. Intente de nuevo.\n";
-        cin.clear(); // Limpia estado de error
-        cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Limpia cualquier residuo
+        cin.clear(); // Limpia el estado de error de cin
     }
 }
 
@@ -304,7 +311,6 @@ void ingresar_auto(){
     }
 }
 
-
 void modificar_auto() {
     mostrar_banner("MODIFICAR AUTO EN INVENTARIO");
 
@@ -312,7 +318,7 @@ void modificar_auto() {
     Auto auto_encontrado = buscar_auto(codigo_busqueda);
 
     if (auto_encontrado.getCodigoAuto().empty()) {
-        cout << "No se encontró un auto con el código " << codigo_busqueda << "." << endl;
+        cout << "No se encontro un auto con el codigo " << codigo_busqueda << "." << endl;
         if (validacion_continuar("Desea intentar de nuevo? (S/N): ")) {
             modificar_auto(); // Volver a intentar
         }
@@ -378,7 +384,7 @@ void eliminar_auto() {
     Auto auto_encontrado = buscar_auto(codigo_busqueda);
 
     if (auto_encontrado.getCodigoAuto().empty()) {
-        cout << "No se encontro un auto con el código " << codigo_busqueda << "." << endl;
+        cout << "No se encontro un auto con el codigo " << codigo_busqueda << "." << endl;
         if (validacion_continuar("Desea intentar de nuevo? (S/N): ")) {
             eliminar_auto(); // Volver a intentar
         }
@@ -410,7 +416,7 @@ void eliminar_auto() {
 
         cout << "Auto eliminado exitosamente." << endl;
     } else {
-        cout << "Eliminación cancelada." << endl;
+        cout << "Eliminacion cancelada." << endl;
     }
 
     if (validacion_continuar("Desea volver al menu principal? (S/N): ")) {
@@ -420,6 +426,39 @@ void eliminar_auto() {
     }
 }
 
+int seleccionar_opcion(const vector<string>& opciones, int min, int max) {
+    bool continuar = true;
+    string entrada;
+    int opcion = -1;
+
+    while (continuar) {
+        // Mostrar las opciones
+        cout << "Seleccione una opcion (" << min << "-" << max << "): " << endl;
+        for (size_t i = 0; i < opciones.size(); i++) {
+            cout << (i + 1) << ". " << opciones[i] << endl;
+        }
+        cout << "Seleccione una opcion: ";
+        cin >> entrada;
+
+        // Verificar si la entrada es numérica
+        if (es_numerico(entrada)) {
+            opcion = convertir_numero(entrada);
+
+            // Verificar si la opcion está dentro del rango válido
+            if (verifica_rango(opcion, min, max)) {
+                continuar = false; // Salir del bucle
+            } else {
+                cout << "Opcion fuera de rango. Intente de nuevo." << endl;
+            }
+        } else {
+            cout << "Entrada inválida. Debe ser un número." << endl;
+        }
+    }
+    return opcion; // Retorna la opcion seleccionada
+}
+
+
+
 void menu_autos(){
     bool continuar = true;
     int opcion_ingresada_num = 0;
@@ -427,61 +466,165 @@ void menu_autos(){
     while(continuar){
         system("cls");
         cout << "=============================" << endl;
-        cout << "1. Ingresar auto al inventario." << endl;
-        cout << "2. Consultar auto del inventario" << endl;
-        cout << "3. Modificar auto del inventario" << endl;
-        cout << "4. Eliminar auto del inventario" << endl;
-        cout << "5. Salir del menu" << endl;
+        vector<string> opciones = {
+            "Ingresar auto al inventario.",
+            "Consultar auto del inventario",
+            "Modificar auto del inventario",
+            "Eliminar auto del inventario",
+            "Salir del menu"
+        };
+        opcion_ingresada_num = seleccionar_opcion(opciones, 1, 5);
         cout << "=============================" << endl;
-        opcion_ingresada = leer_string("Ingrese una opcion: ");
-
-        if(es_numerico(opcion_ingresada)){
-            opcion_ingresada_num = convertir_numero(opcion_ingresada);
-            switch (opcion_ingresada_num){
-                case 1:{
-                    ingresar_auto();
-                    break;
-                }
-                case 2:{
-                    consultar_autos();
-                    break;
-                }
-                case 3:{
-                    modificar_auto();
-                    break;
-                }
-                case 4:{
-                    eliminar_auto();
-                    break;
-                }
-                case 5:{
-                    return;
-                }
-                default:{
-                    cout << "Opcion invalida, vuelva a intentarlo." << endl;
-                }
+            
+        switch (opcion_ingresada_num){
+            case 1:{
+                ingresar_auto();
+                break;
+            }
+            case 2:{
+                consultar_autos();
+                break;
+            }
+            case 3:{
+                modificar_auto();
+                break;
+            }
+            case 4:{
+                eliminar_auto();
+                break;
+            }
+            case 5:{
+                return;
+            }
+            default:{
+                cout << "Opcion invalida, vuelva a intentarlo." << endl;
             }
         }
-        else{
-            cout << "Opcion invalida, vuelva a intentarlo." << endl;
+        
+    }
+}
+
+
+
+bool esFechaValida(const string& fecha) {
+    // Expresion regular para verificar el formato DD/MM/YYYY
+    regex formato(R"(\d{2}/\d{2}/\d{4})");
+    if (!regex_match(fecha, formato)) {
+        return false; // El formato no coincide
+    }
+
+    // Extraer día, mes y año
+    int dia, mes, anio;
+    char separador;
+    istringstream ss(fecha);
+    ss >> dia >> separador >> mes >> separador >> anio;
+
+    // Verificar si la fecha es válida
+    if (mes < 1 || mes > 12) return false; // Mes inválido
+    if (dia < 1 || dia > 31) return false; // Día inválido
+
+    // Verificar meses con 30 días
+    if ((mes == 4 || mes == 6 || mes == 9 || mes == 11) && dia > 30) {
+        return false;
+    }
+
+    // Verificar febrero y años bisiestos
+    if (mes == 2) {
+        bool esBisiesto = (anio % 4 == 0 && anio % 100 != 0) || (anio % 400 == 0);
+        if (dia > 29 || (dia == 29 && !esBisiesto)) {
+            return false;
         }
     }
+
+    return true; // La fecha es válida
 }
 
-void incribir_competencia(){
-
+void incribir_competencia() {
     string codigo = generar_codigo_unico("C", "COMPETENCIAS.txt");
+    string auto1;
+    string auto2;
+    bool existe = true;
+    int categoria;
+    string fecha;
+    int estado;
+    string ganador;
 
-    if(buscar_auto(leer_string("Ingrese el codigo de auto 1: ")).getCodigoAuto() != ""){
-        cout << "EXISTE" << endl;
-    }else{
-        cout << "no EXISTE" << endl;
+    mostrar_banner("REGISTRO DE AUTO A COMPETENCIA");
+
+    cout << endl;
+    cout << "Generando codigo de Competencia unico... " << codigo << endl;
+
+    do {
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        string codigo_auto1 = leer_string("Ingrese el codigo de auto 1: ");
+        Auto auto_busqueda = buscar_auto(codigo_auto1);
+        if (auto_busqueda.getCodigoAuto() != "") {
+            auto1 = auto_busqueda.getCodigoAuto();
+            existe = true;
+        } else {
+            cout << "No existe auto registrado con este codigo." << endl;
+            cout << "Intente de nuevo." << endl;
+            existe = false;
+        }
+    } while(!existe);
+
+    existe = true;
+
+    do {
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        string codigo_auto2 = leer_string("Ingrese el codigo de auto 2: ");
+        Auto auto_busqueda = buscar_auto(codigo_auto2);
+        if (auto_busqueda.getCodigoAuto() != "") {
+            auto2 = auto_busqueda.getCodigoAuto();
+            existe = true;
+        } else {
+            cout << "No existe auto registrado con este codigo." << endl;
+            cout << "Intente de nuevo." << endl;
+            existe = false;
+        }
+    } while(!existe);
+
+    vector<string> categorias = {"Sprint", "Endurance", "Drift"};
+    categoria = seleccionar_opcion(categorias, 1, 3);
+
+    while (true) {
+        cout << "Ingrese la fecha de la competencia (DD/MM/YYYY): ";
+        cin >> fecha;
+
+        // Limpiar el buffer después de usar cin
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+        if (esFechaValida(fecha)) {
+            break;
+        } else {
+            cout << "Formato de fecha incorrecto o fecha invalida. Por favor, use el formato DD/MM/YYYY." << endl;
+        }
     }
 
+    vector<string> estados = {"En proceso", "Cancelada", "Finalizada"};
+    estado = seleccionar_opcion(estados, 1, 3);
+
+    if (estado == 3) {
+        do {
+            cout << "Codigo de Auto 1: " << auto1 << endl;
+            cout << "Codigo de Auto 2: " << auto2 << endl;
+
+            ganador = leer_string("Seleccione un ganador: ");
+            if (ganador != auto1 && ganador != auto2) {
+                cout << "El auto seleccionado no compitio. " << endl;
+                cout << "Seleccione una opcion valida. " << endl;
+            } else {
+                break;
+            }
+        } while(true);
+    }
+
+    cout << "Siguiente pregunta..." << endl;
     cin >> codigo;
 
-}
+    
 
+}
 void consultar_competencia(){
 
 }
@@ -489,34 +632,26 @@ void consultar_competencia(){
 void menu_competencias(){
     bool continuar = true;
     int opcion_ingresada_num = 0;
-    string opcion_ingresada = "";
     while(continuar){
         system("cls");
-        cout << "=============================" << endl;
-        cout << "1. Inscribir auto en competencia" << endl;
-        cout << "2. Consultar competencia" << endl;
-        cout << "3. Salir del programa" << endl;
-        cout << "=============================" << endl;
-        opcion_ingresada = leer_string("Ingrese una opcion: ");
-
-        if(es_numerico(opcion_ingresada)){
-            opcion_ingresada_num = convertir_numero(opcion_ingresada);
-            switch (opcion_ingresada_num){
-                case 1:{
-                    incribir_competencia();
-                    break;
-                }
-                case 2:{
-                    consultar_competencia();
-                    break;
-                }
-                default:{
-                    cout << "Ingrese una opcion correcta. (1-2)" << endl;
-                }
+        vector<string> opciones = {
+            "Inscribir auto en competencia",
+            "Consultar competencia",
+            "Salir del programa"
+        };
+        opcion_ingresada_num = seleccionar_opcion(opciones, 1, 3);
+        switch (opcion_ingresada_num){
+            case 1:{
+                incribir_competencia();
+                break;
             }
-        }
-        else{
-            cout << "Ingrese una opcion correcta. (1-2)" << endl;
+            case 2:{
+                consultar_competencia();
+                break;
+            }
+            default:{
+                cout << "Ingrese una opcion correcta. (1-2)" << endl;
+            }
         }
     }
 }
@@ -574,9 +709,6 @@ void menu(){
 }
 
 int main() {
-
-
-
     menu();
     return 0;
 }
