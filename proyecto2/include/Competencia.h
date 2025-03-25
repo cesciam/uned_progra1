@@ -17,7 +17,7 @@ public:
     // Constructor
     Competencia(std::string codigoCompetencia, std::string codigoAuto1, std::string codigoAuto2,
                 std::string categoriaCarrera, std::string fechaCompetencia, std::string estadoCompetencia,
-                std::string ganador = "");
+                std::string ganador);
 
     // Getters
     std::string getCodigoCompetencia() const;

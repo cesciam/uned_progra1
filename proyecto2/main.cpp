@@ -15,6 +15,7 @@ using namespace std;
 
 // Inicio Definicion de funciones
 void menu();  // Declaracion de la funcion antes de main()
+void menu_competencias();
 // Fin Definicion de funciones
 
 bool verifica_rango(int valor, int valor_min, int valor_max){
@@ -94,11 +95,9 @@ string leer_string(string mensaje) {
     string entrada;
     while (true) {
         cout << mensaje;
+        if (cin.peek() == '\n') cin.ignore(); // Limpia el buffer si hay un salto de línea previo
         getline(cin, entrada);
-        if (!entrada.empty()) {
-            // Si la cadena no esta vacia, salimos del bucle
-            break;
-        }
+        if (!entrada.empty()) break;
     }
     return entrada;
 }
@@ -457,8 +456,6 @@ int seleccionar_opcion(const vector<string>& opciones, int min, int max) {
     return opcion; // Retorna la opcion seleccionada
 }
 
-
-
 void menu_autos(){
     bool continuar = true;
     int opcion_ingresada_num = 0;
@@ -504,8 +501,6 @@ void menu_autos(){
     }
 }
 
-
-
 bool esFechaValida(const string& fecha) {
     // Expresion regular para verificar el formato DD/MM/YYYY
     regex formato(R"(\d{2}/\d{2}/\d{4})");
@@ -539,6 +534,28 @@ bool esFechaValida(const string& fecha) {
     return true; // La fecha es válida
 }
 
+
+void guardar_competencia(const Competencia& nueva_competencia) {
+    ofstream archivo("COMPETENCIAS.txt", ios::app); // Abre el archivo en modo append
+    if (archivo.is_open()) {
+        archivo << nueva_competencia.getCodigoCompetencia()
+        << "," << nueva_competencia.getCodigoAuto1()
+        << "," << nueva_competencia.getCodigoAuto2()
+        << "," << nueva_competencia.getCategoriaCarrera()
+        << "," << nueva_competencia.getFechaCompetencia()
+        << "," << nueva_competencia.getEstadoCompetencia()
+        << ","<< nueva_competencia.getGanador() << endl;
+        archivo.close();
+    } else {
+        cout << "Error: No se pudo abrir el archivo COMPETENCIAS.TXT." << endl;
+        if (validacion_continuar ("Desea volver a intentarlo? (S/N): ")){
+            guardar_competencia(nueva_competencia);
+        } else {
+            return;
+        }
+    }
+}
+
 void incribir_competencia() {
     string codigo = generar_codigo_unico("C", "COMPETENCIAS.txt");
     string auto1;
@@ -555,7 +572,6 @@ void incribir_competencia() {
     cout << "Generando codigo de Competencia unico... " << codigo << endl;
 
     do {
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
         string codigo_auto1 = leer_string("Ingrese el codigo de auto 1: ");
         Auto auto_busqueda = buscar_auto(codigo_auto1);
         if (auto_busqueda.getCodigoAuto() != "") {
@@ -566,12 +582,12 @@ void incribir_competencia() {
             cout << "Intente de nuevo." << endl;
             existe = false;
         }
+        //cin.ignore(numeric_limits<streamsize>::max(), '\n');
     } while(!existe);
 
     existe = true;
 
     do {
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
         string codigo_auto2 = leer_string("Ingrese el codigo de auto 2: ");
         Auto auto_busqueda = buscar_auto(codigo_auto2);
         if (auto_busqueda.getCodigoAuto() != "") {
@@ -617,14 +633,27 @@ void incribir_competencia() {
                 break;
             }
         } while(true);
+    }else{
+        ganador = "-";
     }
 
-    cout << "Siguiente pregunta..." << endl;
-    cin >> codigo;
+    Competencia nueva_competencia (codigo, auto1, auto2, categorias[categoria-1], fecha, estados[estado-1], ganador);
 
-    
+    mostrar_banner("La inscripcion ha sido exitosa.");
+    cout << "" << endl;
+    cout << "La competencia ha sido registada en COMPENTENCIAS.TXT" << endl;
+    cout << "" << endl;
+    nueva_competencia.mostrarInformacion();
+    guardar_competencia(nueva_competencia);
+    cout << "================================================"<< endl;
 
+    if(validacion_continuar("Desea volver al menu principal? (S/N)")){
+        menu();
+    }else{
+        menu_competencias();
+    }
 }
+
 void consultar_competencia(){
 
 }
