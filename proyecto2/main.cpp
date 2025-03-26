@@ -27,6 +27,38 @@ bool verifica_rango(int valor, int valor_min, int valor_max){
     }
 }
 
+Competencia parsear_linea_a_competencia(const string& linea) {
+    string codigo, auto1, auto2, categoria, fecha, estado, ganador;
+
+    size_t pos = linea.find(',');
+    codigo = linea.substr(0, pos);
+    string resto = linea.substr(pos + 1);
+
+    pos = resto.find(',');
+    auto1 = resto.substr(0, pos);
+    resto = resto.substr(pos + 1);
+
+    pos = resto.find(',');
+    auto2 = resto.substr(0, pos);
+    resto = resto.substr(pos + 1);
+
+    pos = resto.find(',');
+    categoria = resto.substr(0, pos);
+    resto = resto.substr(pos + 1);
+
+    pos = resto.find(',');
+    fecha = resto.substr(0, pos);
+    resto = resto.substr(pos + 1);
+
+    pos = resto.find(',');
+    estado = resto.substr(0, pos);
+    resto = resto.substr(pos + 1);
+
+    ganador = resto;
+
+    return Competencia(codigo, auto1, auto2, categoria, fecha, estado, ganador);
+}
+
 Auto parsear_linea_a_auto(const string& linea) {
     string codigo, nombre, equipo, id_registro;
     int velocidad, caballos_fuerza, costo;
@@ -125,15 +157,30 @@ bool validacion_continuar(const string& mensaje) {
     }
 }
 
-void consultar_autos() {
-    ifstream archivo("AUTOS.TXT");
+void consultar_objetos(string nombre_archivo) {
+    string objeto;
+    ifstream archivo(nombre_archivo);
     if (!archivo) { // Verificar si el archivo se abri� correctamente
         cout << "Error: No se pudo abrir el archivo." << endl;
         return;
     }
+
+    // Verificar si el archivo está vacío
+    if (archivo.peek() == ifstream::traits_type::eof()) {
+        cout << "El archivo " << nombre_archivo << " está vacío." << endl;
+        archivo.close();
+        return;
+    }
+
+    if (nombre_archivo == "AUTOS.txt"){
+        objeto = "auto";
+    }else{
+        objeto = "competencia";
+    }
+
     string codigo_busqueda;
     mostrar_banner("CONSULTAR AUTO EN INVENTARIO");
-    codigo_busqueda = leer_string("Ingrese el codigo del auto a buscar: ");
+    codigo_busqueda = leer_string("Ingrese el codigo de " + objeto + " a buscar: ");
     cout << "Buscando auto con codigo: " << codigo_busqueda << "..."<<endl;
 
     string linea;
@@ -142,19 +189,24 @@ void consultar_autos() {
     while (getline(archivo, linea)) { // Leer cada l�nea del archivo
         size_t pos = linea.find(',');
         if (pos != string::npos && linea.substr(0, pos) == codigo_busqueda) {
-            // Parsear la l�nea y crear un objeto Auto
-            Auto auto_encontrado = parsear_linea_a_auto(linea);
-            // Mostrar la informaci�n del auto
-            mostrar_banner ("Datos del auto encontrado");
-            cout << "Datos del auto encontrado:"<< endl;
-            auto_encontrado.mostrarInformacion();
+
+            mostrar_banner ("Datos del " + objeto + " encontrado");
+            cout << "Datos de " + objeto + " encontrado:"<< endl;
+            // Parsear la linea y crear un objeto Auto
+            if(objeto == "auto"){
+                Auto auto_encontrado = parsear_linea_a_auto(linea);
+                auto_encontrado.mostrarInformacion();
+            }else{
+                Competencia competencia_encontrada = parsear_linea_a_competencia(linea);
+                competencia_encontrada.mostrarInformacion();
+            }            
             encontrado = true;
             break;
         }
     }
 
     if (!encontrado) {
-        cout << "No se encontro un auto con el codigo " << codigo_busqueda << "." << endl;
+        cout << "No se encontro " + objeto + "  con el codigo " << codigo_busqueda << "." << endl;
     }
 
     archivo.close(); // Cerrar el archivo despues de usarlo
@@ -162,7 +214,7 @@ void consultar_autos() {
     if (validacion_continuar("Desea volver al menu principal? (S/N): ")) {
         menu();
     } else {
-        consultar_autos(); // Volver a consultar otro auto
+        consultar_objetos(nombre_archivo); // Volver a consultar otro auto
     }
 }
 
@@ -460,8 +512,8 @@ void menu_autos(){
     bool continuar = true;
     int opcion_ingresada_num = 0;
     string opcion_ingresada = "";
+    system("cls");
     while(continuar){
-        system("cls");
         cout << "=============================" << endl;
         vector<string> opciones = {
             "Ingresar auto al inventario.",
@@ -479,7 +531,7 @@ void menu_autos(){
                 break;
             }
             case 2:{
-                consultar_autos();
+                consultar_objetos("AUTOS.txt");
                 break;
             }
             case 3:{
@@ -591,8 +643,14 @@ void incribir_competencia() {
         string codigo_auto2 = leer_string("Ingrese el codigo de auto 2: ");
         Auto auto_busqueda = buscar_auto(codigo_auto2);
         if (auto_busqueda.getCodigoAuto() != "") {
-            auto2 = auto_busqueda.getCodigoAuto();
-            existe = true;
+            if (auto_busqueda.getCodigoAuto() == auto1){
+                cout << "El codigo no puede ser igual al del primer auto. Por favor ingrese otro" << endl;
+                existe = false;
+            }else{
+                auto2 = auto_busqueda.getCodigoAuto();
+                existe = true;
+            }
+            
         } else {
             cout << "No existe auto registrado con este codigo." << endl;
             cout << "Intente de nuevo." << endl;
@@ -654,9 +712,6 @@ void incribir_competencia() {
     }
 }
 
-void consultar_competencia(){
-
-}
 
 void menu_competencias(){
     bool continuar = true;
@@ -666,7 +721,7 @@ void menu_competencias(){
         vector<string> opciones = {
             "Inscribir auto en competencia",
             "Consultar competencia",
-            "Salir del programa"
+            "Volver al menu"
         };
         opcion_ingresada_num = seleccionar_opcion(opciones, 1, 3);
         switch (opcion_ingresada_num){
@@ -675,7 +730,11 @@ void menu_competencias(){
                 break;
             }
             case 2:{
-                consultar_competencia();
+                consultar_objetos("COMPETENCIAS.txt");
+                break;
+            }
+            case 3:{
+                menu();
                 break;
             }
             default:{
@@ -685,12 +744,20 @@ void menu_competencias(){
     }
 }
 
+void reporte_inventario(){
+    mostrar_banner("REPORTE DE AUTOS EN INVENTARIO");
+    cout << "Generando reporte..." << endl;
+
+    cout << "=============================" << endl;
+    
+}
+
 void menu(){
     bool continuar = true;
     int opcion_ingresada_num = 0;
     string opcion_ingresada = "";
+    system("cls");
     while(continuar){
-        system("cls");
         cout << "=============================" << endl;
         cout << "1. Inventario de Autos" << endl;
         cout << "2. Registro de Competencias" << endl;
@@ -712,7 +779,7 @@ void menu(){
                     break;
                 }
                 case 3:{
-                    // reporte_inventario();
+                    reporte_inventario();
                     cout << "// inventario();"<< endl;
                     break;
                 }

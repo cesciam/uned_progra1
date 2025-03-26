@@ -33,7 +33,7 @@ void Competencia::setGanador(const std::string& ganador) {
     }
 }
 
-// Método para mostrar información
+// Mï¿½todo para mostrar informaciï¿½n
 void Competencia::mostrarInformacion() const {
     std::cout << "Codigo de Competencia: " << codigoCompetencia << std::endl;
     std::cout << "Codigo de Auto 1: " << codigoAuto1 << std::endl;
@@ -41,7 +41,5 @@ void Competencia::mostrarInformacion() const {
     std::cout << "Categoria de la Carrera: " << categoriaCarrera << std::endl;
     std::cout << "Fecha de la Competencia: " << fechaCompetencia << std::endl;
     std::cout << "Estado de la Competencia: " << estadoCompetencia << std::endl;
-    if (estadoCompetencia == "Finalizada") {
-        std::cout << "Ganador: " << ganador << std::endl;
-    }
+    std::cout << "Ganador: " << ganador << std::endl;
 }
