@@ -11,6 +11,7 @@
 #include <ctime>   // Para time()
 #include <vector>
 #include <regex>
+#include <iomanip> // Necesario para setw, left, right
 using namespace std;
 
 // Inicio Definicion de funciones
@@ -179,9 +180,9 @@ void consultar_objetos(string nombre_archivo) {
     }
 
     string codigo_busqueda;
-    mostrar_banner("CONSULTAR AUTO EN INVENTARIO");
+    mostrar_banner("CONSULTAR " + objeto + " EN INVENTARIO");
     codigo_busqueda = leer_string("Ingrese el codigo de " + objeto + " a buscar: ");
-    cout << "Buscando auto con codigo: " << codigo_busqueda << "..."<<endl;
+    cout << "Buscando " + objeto + " con codigo: " << codigo_busqueda << "..."<<endl;
 
     string linea;
     bool encontrado = false;
@@ -289,7 +290,7 @@ bool es_numerico(const string& numero) {
     return true;
 }
 
-// Funci�n que convierte una cadena a n�mero entero
+// Funcion que convierte una cadena a n�mero entero
 int convertir_numero(const string& numero) {
     if (!es_numerico(numero)) return -1; // Si no es num�rico, retorna -1
     try {
@@ -586,7 +587,6 @@ bool esFechaValida(const string& fecha) {
     return true; // La fecha es válida
 }
 
-
 void guardar_competencia(const Competencia& nueva_competencia) {
     ofstream archivo("COMPETENCIAS.txt", ios::app); // Abre el archivo en modo append
     if (archivo.is_open()) {
@@ -712,7 +712,6 @@ void incribir_competencia() {
     }
 }
 
-
 void menu_competencias(){
     bool continuar = true;
     int opcion_ingresada_num = 0;
@@ -747,9 +746,106 @@ void menu_competencias(){
 void reporte_inventario(){
     mostrar_banner("REPORTE DE AUTOS EN INVENTARIO");
     cout << "Generando reporte..." << endl;
-
+    cout << "" << endl;
     cout << "=============================" << endl;
+
+    string objeto;
+    ifstream archivo("AUTOS.txt");
+    if (!archivo) { // Verificar si el archivo se abrio correctamente
+        cout << "Error: No se pudo abrir el archivo." << endl;
+        return;
+    }
+
+    // Verificar si el archivo está vacío
+    if (archivo.peek() == ifstream::traits_type::eof()) {
+        cout << "El archivo AUTOS.txt está vacío." << endl;
+        archivo.close();
+        return;
+    }
+
+    string linea;
     
+    cout << left << setw(11) << "| Codigo" 
+    << left << setw(21) << " | Nombre" 
+    << left << setw(10) << " | Vel. Max" 
+    << left << setw(10) << " | Caballos" 
+    << left << setw(11) << " | Costo" 
+    << left << setw(10) << " | ID Reg.   |" << endl;
+    
+    cout << "| " << setw(9) << setfill('-') << "" << " | " 
+    << setw(18) << "" << " | " 
+    << setw(8) << "" << " | " 
+    << setw(8) << "" << " | " 
+    << setw(8) << "" << " | " 
+    << setw(9) << "" << " |" << setfill(' ') << endl;   
+
+    while (getline(archivo, linea)) {
+    Auto auto_x = parsear_linea_a_auto(linea);
+    cout << left << "| " << setw(8) << auto_x.getCodigoAuto()
+            << left << " | " << setw(18) << auto_x.getNombreAuto()
+            << left << " | " << setw(8) << auto_x.getVelocidadMaxima()
+            << left << " | " << setw(8) << auto_x.getCaballosFuerza()
+            << left << " | " << setw(8) << auto_x.getCostoAuto()
+            << left << " | " << setw(9) << auto_x.getIdRegistrador() << " |" << endl;
+    }
+        
+    archivo.close(); // Cerrar el archivo despues de usarlo
+
+    if (validacion_continuar("Desea volver al menu principal? (S/N): ")) {
+        menu();
+    } else {
+        reporte_inventario(); // Volver a consultar otro auto
+    }
+}
+
+void reporte_competencia(){
+    string nombre_archivo = "COMPETENCIAS.txt";
+    mostrar_banner("REPORTE DE COMPETENCIAS");
+    cout << "Generando reporte..." << endl;
+    cout << "" << endl;
+    cout << "=============================" << endl;
+
+    string objeto;
+    ifstream archivo(nombre_archivo);
+    if (!archivo) { // Verificar si el archivo se abrio correctamente
+        cout << "Error: No se pudo abrir el archivo." << endl;
+        return;
+    }
+
+    // Verificar si el archivo está vacío
+    if (archivo.peek() == ifstream::traits_type::eof()) {
+        cout << "El archivo "<<nombre_archivo<<" está vacío." << endl;
+        archivo.close();
+        return;
+    }
+
+    string linea;
+    while (getline(archivo, linea)) {
+        Competencia competencia_x = parsear_linea_a_competencia(linea);
+        cout << "Codigo de Competencia: "<<competencia_x.getCodigoCompetencia()<< endl;
+        if(competencia_x.getEstadoCompetencia() == "Finalizada"){
+            cout << "Codigo de auto ganador: "<<competencia_x.getGanador()<< endl;
+            string perdedor = "";
+            if(competencia_x.getGanador() == competencia_x.getCodigoAuto1()){
+                perdedor = competencia_x.getCodigoAuto2();
+            } else {
+                perdedor = competencia_x.getCodigoAuto1();
+            }
+            cout << "Codigo de auto perdedor: "<<perdedor<< endl;
+        }
+        cout << "Categoria:  "<<competencia_x.getCategoriaCarrera()<< endl;
+        cout << "Fecha:  "<<competencia_x.getFechaCompetencia()<< endl;
+        cout << "Estado:  "<<competencia_x.getEstadoCompetencia()<< endl;
+        cout << "=============================" << endl;
+    }
+        
+    archivo.close(); // Cerrar el archivo despues de usarlo
+
+    if (validacion_continuar("Desea volver al menu principal? (S/N): ")) {
+        menu();
+    } else {
+        reporte_inventario(); // Volver a consultar otro auto
+    }
 }
 
 void menu(){
@@ -780,17 +876,20 @@ void menu(){
                 }
                 case 3:{
                     reporte_inventario();
-                    cout << "// inventario();"<< endl;
                     break;
                 }
                 case 4:{
-                    // reporte_competencias();
-                    cout << "// reporte_competencias();"<< endl;
+                    reporte_competencia();
                     break;
                 }
                 case 5:{
                     continuar = false;
-                    cout << "Gracias por usar nuestro sistema" << endl;
+                    if (validacion_continuar("Desea salir del programa? (S/N): ")) {
+                        continuar=false;
+                        break;
+                    } else {
+                        break;
+                    }                    
                     break;
                 }
                 default:{
